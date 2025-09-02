@@ -11,7 +11,10 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173", 'https://mernfrontend-chi.vercel.app',
+    origin: [
+        "http://localhost:5173",             // dev frontend
+        "https://mernfrontend-chi.vercel.app" // deployed frontend
+    ],
 }))
 
 app.use(express.json()); // for parsing application/json
