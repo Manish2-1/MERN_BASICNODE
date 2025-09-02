@@ -33,7 +33,7 @@ app.post("/book", upload.single('image'), async (req, res) => {
     if (!req.file) {
         fileName = "https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
     } else {
-        fileName = "http://localhost:3000/" + req.file.filename
+        fileName = "https://mern-basicnode.onrender.com/" + req.file.filename
     }
     const { bookName, bookPrice, isbnNumber, authorName, publishedAt, publication } = req.body
     await Book.create({
@@ -90,8 +90,8 @@ app.delete("/book/:id", async (req, res) => {
         }
 
         // Delete image file only if it's stored locally (not placeholder or external link)
-        if (book.imageUrl && book.imageUrl.startsWith("http://localhost:3000/")) {
-            const localHostUrlLength = "http://localhost:3000/".length;
+        if (book.imageUrl && book.imageUrl.startsWith("https://mern-basicnode.onrender.com/")) {
+            const localHostUrlLength = "https://mern-basicnode.onrender.com/".length;
             const imagePath = book.imageUrl.slice(localHostUrlLength);
 
             fs.unlink(`storage/${imagePath}`, (err) => {
@@ -130,9 +130,9 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
 
     if (req.file) {
         // delete old file if it was not a placeholder image
-        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith("http://localhost:3000/")) {
+        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith("https://mern-basicnode.onrender.com/")) {
             const oldImagePath = oldDatas.imageUrl;
-            const localHostUrlLength = "http://localhost:3000/".length;
+            const localHostUrlLength = "https://mern-basicnode.onrender.com/".length;
             const newOldImagePath = oldImagePath.slice(localHostUrlLength);
 
             fs.unlink(`storage/${newOldImagePath}`, (err) => {
@@ -145,7 +145,7 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
         }
 
         // save new file path
-        fileName = "http://localhost:3000/" + req.file.filename;
+        fileName = "https://mern-basicnode.onrender.com/" + req.file.filename;
     }
     await Book.findByIdAndUpdate(id, {
         bookName,
