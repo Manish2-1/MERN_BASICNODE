@@ -8,18 +8,15 @@ const upload = multer({ storage: storage }); // multer configuration for file up
 
 const cors = require('cors');
 
-
-
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://mernfrontend-chi.vercel.app',
 }))
 
 app.use(express.json()); // for parsing application/json
 
 connectToDatabase();
-
 
 app.get("/", (req, res) => {
     res.status(400).json(
@@ -76,8 +73,7 @@ app.get("/book/:id", async (req, res) => {
     }
 })
 
-//delete operation 
-// delete operation 
+//delete operation  
 app.delete("/book/:id", async (req, res) => {
     const id = req.params.id;
 
@@ -117,7 +113,6 @@ app.delete("/book/:id", async (req, res) => {
         });
     }
 });
-
 
 // update operation 
 app.patch("/book/:id", upload.single('image'), async (req, res) => {
@@ -167,7 +162,7 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
 app.use(express.static("./storage/"))
 
 app.listen(process.env.PORT, () => {
-    console.log('Nodejs Server is running on port 3000');
+    console.log(`Nodejs Server is running on port ${process.env.PORT}`);
 })
 
 
