@@ -29,11 +29,11 @@ app.get("/", (req, res) => {
 
 // create book
 app.post("/book", upload.single('image'), async (req, res) => {
-    let fileName;
+    let fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;;
     if (!req.file) {
         fileName = "https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
     } else {
-        fileName = "https://mern-basicnode.onrender.com/" + req.file.filename
+        fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
     }
     const { bookName, bookPrice, isbnNumber, authorName, publishedAt, publication } = req.body
     await Book.create({
@@ -90,16 +90,12 @@ app.delete("/book/:id", async (req, res) => {
         }
 
         // Delete image file only if it's stored locally (not placeholder or external link)
-        if (book.imageUrl && book.imageUrl.startsWith("https://mern-basicnode.onrender.com/")) {
-            const localHostUrlLength = "https://mern-basicnode.onrender.com/".length;
-            const imagePath = book.imageUrl.slice(localHostUrlLength);
-
+        if (book.imageUrl && book.imageUrl.startsWith(`${req.protocol}://${req.get("host")}/`)) {
+            const baseUrlLength = `${req.protocol}://${req.get("host")}/`.length;
+            const imagePath = book.imageUrl.slice(baseUrlLength);
             fs.unlink(`storage/${imagePath}`, (err) => {
-                if (err) {
-                    console.error("Error deleting file:", err);
-                } else {
-                    console.log("Image file deleted successfully");
-                }
+                if (err) console.error("Error deleting file:", err);
+                else console.log("Image file deleted successfully");
             });
         }
 
@@ -130,23 +126,20 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
 
     if (req.file) {
         // delete old file if it was not a placeholder image
-        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith("https://mern-basicnode.onrender.com/")) {
-            const oldImagePath = oldDatas.imageUrl;
-            const localHostUrlLength = "https://mern-basicnode.onrender.com/".length;
-            const newOldImagePath = oldImagePath.slice(localHostUrlLength);
+        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith(`${req.protocol}://${req.get("host")}/`)) {
+            const localHostUrlLength = `${req.protocol}://${req.get("host")}/`.length;
+            const newOldImagePath = oldDatas.imageUrl.slice(localHostUrlLength);
 
             fs.unlink(`storage/${newOldImagePath}`, (err) => {
-                if (err) {
-                    console.log("Error deleting old file:", err);
-                } else {
-                    console.log("Old file deleted successfully");
-                }
+                if (err) console.log("Error deleting old file:", err);
+                else console.log("Old file deleted successfully");
             });
         }
 
         // save new file path
-        fileName = "https://mern-basicnode.onrender.com/" + req.file.filename;
+        fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
     }
+
     await Book.findByIdAndUpdate(id, {
         bookName,
         bookPrice,
