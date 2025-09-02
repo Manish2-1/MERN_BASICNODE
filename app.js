@@ -21,6 +21,8 @@ app.use(express.json()); // for parsing application/json
 
 connectToDatabase();
 
+const BASE_URL = "https://mern-basicnode.onrender.com"; // your Render backend URL
+
 app.get("/", (req, res) => {
     res.status(400).json(
         { "message": "how are u" }
@@ -29,12 +31,10 @@ app.get("/", (req, res) => {
 
 // create book
 app.post("/book", upload.single('image'), async (req, res) => {
-    let fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;;
-    if (!req.file) {
-        fileName = "https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
-    } else {
-        fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
-    }
+    let fileName = req.file
+        ? `${BASE_URL}/${req.file.filename}`
+        : "https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg";
+
     const { bookName, bookPrice, isbnNumber, authorName, publishedAt, publication } = req.body
     await Book.create({
         bookName,
@@ -90,15 +90,13 @@ app.delete("/book/:id", async (req, res) => {
         }
 
         // Delete image file only if it's stored locally (not placeholder or external link)
-        if (book.imageUrl && book.imageUrl.startsWith(`${req.protocol}://${req.get("host")}/`)) {
-            const baseUrlLength = `${req.protocol}://${req.get("host")}/`.length;
-            const imagePath = book.imageUrl.slice(baseUrlLength);
+        if (book.imageUrl && book.imageUrl.startsWith(BASE_URL)) {
+            const imagePath = book.imageUrl.slice(BASE_URL.length + 1);
             fs.unlink(`storage/${imagePath}`, (err) => {
                 if (err) console.error("Error deleting file:", err);
                 else console.log("Image file deleted successfully");
             });
         }
-
         // Delete book from DB
         await Book.findByIdAndDelete(id);
 
@@ -126,18 +124,17 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
 
     if (req.file) {
         // delete old file if it was not a placeholder image
-        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith(`${req.protocol}://${req.get("host")}/`)) {
-            const localHostUrlLength = `${req.protocol}://${req.get("host")}/`.length;
-            const newOldImagePath = oldDatas.imageUrl.slice(localHostUrlLength);
-
-            fs.unlink(`storage/${newOldImagePath}`, (err) => {
+        if (oldDatas.imageUrl && oldDatas.imageUrl.startsWith(BASE_URL)) {
+            const oldImagePath = oldDatas.imageUrl.slice(BASE_URL.length + 1);
+            fs.unlink(`storage/${oldImagePath}`, (err) => {
                 if (err) console.log("Error deleting old file:", err);
                 else console.log("Old file deleted successfully");
             });
         }
 
         // save new file path
-        fileName = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
+        fileName = `${BASE_URL}/${req.file.filename}`;
+
     }
 
     await Book.findByIdAndUpdate(id, {
