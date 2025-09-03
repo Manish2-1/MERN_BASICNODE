@@ -98,15 +98,13 @@ app.delete("/book/:id", async (req, res) => {
             }
         }
 
-    }
-
         await Book.findByIdAndDelete(id);
-    res.status(200).json({ message: "Book Deleted Successfully" });
+        res.status(200).json({ message: "Book Deleted Successfully" });
 
-} catch (error) {
-    console.error("Error deleting book:", error);
-    res.status(500).json({ message: "Something went wrong" });
-}
+    } catch (error) {
+        console.error("Error deleting book:", error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
 });
 
 // UPDATE book
