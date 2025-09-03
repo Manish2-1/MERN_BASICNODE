@@ -86,19 +86,27 @@ app.delete("/book/:id", async (req, res) => {
         // ✅ Delete local image file if it exists
         if (book.imageUrl && book.imageUrl.startsWith(`${BASE_URL}/storage/`)) {
             const imagePath = book.imageUrl.replace(`${BASE_URL}/storage/`, "");
-            fs.unlink(`storage/${imagePath}`, (err) => {
-                if (err) console.error("Error deleting file:", err);
-                else console.log("Image file deleted successfully");
-            });
+            const filePath = `storage/${imagePath}`;
+
+            if (fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error("Error deleting file:", err);
+                    else console.log("Image file deleted successfully");
+                });
+            } else {
+                console.log("File not found, skipping delete:", filePath);
+            }
         }
 
-        await Book.findByIdAndDelete(id);
-        res.status(200).json({ message: "Book Deleted Successfully" });
-
-    } catch (error) {
-        console.error("Error deleting book:", error);
-        res.status(500).json({ message: "Something went wrong" });
     }
+
+        await Book.findByIdAndDelete(id);
+    res.status(200).json({ message: "Book Deleted Successfully" });
+
+} catch (error) {
+    console.error("Error deleting book:", error);
+    res.status(500).json({ message: "Something went wrong" });
+}
 });
 
 // UPDATE book
