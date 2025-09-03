@@ -13,7 +13,7 @@ const app = express();
 app.use(cors({
     origin: [
         "http://localhost:5173",             // dev frontend
-        "https://mernfrontend-chi.vercel.app" // deployed frontend
+        "https://mernfrontend-chi.vercel.app", // deployed frontend
     ],
 }))
 
@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 // create book
 app.post("/book", upload.single('image'), async (req, res) => {
     let fileName = req.file
-        ? `${BASE_URL}/${req.file.filename}`
+        ? `${BASE_URL}/storage/${req.file.filename}`
         : "https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg";
 
     const { bookName, bookPrice, isbnNumber, authorName, publishedAt, publication } = req.body
@@ -133,7 +133,7 @@ app.patch("/book/:id", upload.single('image'), async (req, res) => {
         }
 
         // save new file path
-        fileName = `${BASE_URL}/${req.file.filename}`;
+        fileName = `${BASE_URL}/storage/${req.file.filename}`;
 
     }
 
